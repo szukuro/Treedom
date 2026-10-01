@@ -1,0 +1,1915 @@
+{
+  "schemaVersion": 1,
+  "id": "example-it-services",
+  "title": "Kestrel Digital – are we the right partner?",
+  "description": "Example: helps a prospective customer decide whether to engage an IT services company that serves upper-mid to extra-large organisations (architecture, DevOps, development, testing for web & mobile).",
+  "startNodeId": "start",
+  "variables": [
+    {
+      "key": "intent_build",
+      "label": "Wants to build something new",
+      "initial": 0,
+      "min": 0,
+      "max": 1
+    },
+    {
+      "key": "intent_improve",
+      "label": "Wants to improve an existing system",
+      "initial": 0,
+      "min": 0,
+      "max": 1
+    },
+    {
+      "key": "intent_advice",
+      "label": "Wants expert advice",
+      "initial": 0,
+      "min": 0,
+      "max": 1
+    },
+    {
+      "key": "size",
+      "label": "Company size tier",
+      "initial": 0,
+      "min": 0,
+      "max": 5,
+      "description": "0 = unknown, 1 = <10 people … 5 = 2000+"
+    },
+    {
+      "key": "budget",
+      "label": "Budget tier",
+      "initial": 0,
+      "min": 0,
+      "max": 4,
+      "description": "0 = unknown, 1 = <€15k … 4 = €300k+"
+    },
+    {
+      "key": "complexity",
+      "label": "Solution complexity score",
+      "initial": 0,
+      "min": 0
+    },
+    {
+      "key": "fit",
+      "label": "Fit score",
+      "description": "How well the customer matches our sweet spot (can go negative).",
+      "initial": 0
+    },
+    {
+      "key": "web",
+      "label": "Web platform involved",
+      "initial": 0,
+      "min": 0,
+      "max": 1
+    },
+    {
+      "key": "mobile",
+      "label": "Mobile platform involved",
+      "initial": 0,
+      "min": 0,
+      "max": 1
+    },
+    {
+      "key": "off_platform",
+      "label": "Needs something other than web/mobile",
+      "initial": 0,
+      "min": 0,
+      "max": 1
+    },
+    {
+      "key": "has_team",
+      "label": "Has an in-house dev team",
+      "initial": 0,
+      "min": 0,
+      "max": 1
+    },
+    {
+      "key": "regulated",
+      "label": "Regulated / high-stakes environment",
+      "initial": 0,
+      "min": 0,
+      "max": 1
+    },
+    {
+      "key": "pains",
+      "label": "Number of pain points picked",
+      "initial": 0,
+      "min": 0,
+      "max": 5
+    },
+    {
+      "key": "pain_release",
+      "label": "Pain: slow or risky releases",
+      "initial": 0,
+      "min": 0,
+      "max": 1
+    },
+    {
+      "key": "pain_outage",
+      "label": "Pain: outages",
+      "initial": 0,
+      "min": 0,
+      "max": 1
+    },
+    {
+      "key": "pain_bugs",
+      "label": "Pain: bugs reach users",
+      "initial": 0,
+      "min": 0,
+      "max": 1
+    },
+    {
+      "key": "pain_scale",
+      "label": "Pain: cannot scale",
+      "initial": 0,
+      "min": 0,
+      "max": 1
+    },
+    {
+      "key": "pain_capacity",
+      "label": "Pain: not enough delivery capacity",
+      "initial": 0,
+      "min": 0,
+      "max": 1
+    },
+    {
+      "key": "need_arch",
+      "label": "Need: architecture",
+      "initial": 0,
+      "min": 0
+    },
+    {
+      "key": "need_devops",
+      "label": "Need: DevOps",
+      "initial": 0,
+      "min": 0
+    },
+    {
+      "key": "need_dev",
+      "label": "Need: development",
+      "initial": 0,
+      "min": 0
+    },
+    {
+      "key": "need_qa",
+      "label": "Need: testing / QA",
+      "initial": 0,
+      "min": 0
+    }
+  ],
+  "nodes": [
+    {
+      "id": "start",
+      "kind": "question",
+      "title": "What brings you here today?",
+      "body": "Answer a few quick questions and we'll tell you honestly whether we are the right partner – or point you somewhere better.",
+      "onEnter": [],
+      "choices": [
+        {
+          "id": "build",
+          "label": "We want to build a new website, portal or app",
+          "effects": [
+            {
+              "var": "intent_build",
+              "op": "set",
+              "value": 1
+            }
+          ],
+          "transitions": [
+            {
+              "id": "t1",
+              "to": "what_build"
+            }
+          ]
+        },
+        {
+          "id": "improve",
+          "label": "We have a system that needs help (delivery speed, stability, quality)",
+          "effects": [
+            {
+              "var": "intent_improve",
+              "op": "set",
+              "value": 1
+            }
+          ],
+          "transitions": [
+            {
+              "id": "t2",
+              "to": "size"
+            }
+          ]
+        },
+        {
+          "id": "advice",
+          "label": "We need expert advice or a second opinion",
+          "effects": [
+            {
+              "var": "intent_advice",
+              "op": "set",
+              "value": 1
+            }
+          ],
+          "transitions": [
+            {
+              "id": "t3",
+              "to": "size"
+            }
+          ]
+        },
+        {
+          "id": "explore",
+          "label": "Just looking around",
+          "effects": [],
+          "transitions": [
+            {
+              "id": "t4",
+              "to": "size"
+            }
+          ]
+        }
+      ],
+      "transitions": []
+    },
+    {
+      "id": "what_build",
+      "kind": "question",
+      "title": "What are you planning to build?",
+      "body": "Pick the option closest to your plans.",
+      "onEnter": [],
+      "choices": [
+        {
+          "id": "brochure",
+          "label": "A company / presentation website",
+          "effects": [
+            {
+              "var": "web",
+              "op": "set",
+              "value": 1
+            },
+            {
+              "var": "complexity",
+              "op": "add",
+              "value": 1
+            }
+          ],
+          "transitions": []
+        },
+        {
+          "id": "shop",
+          "label": "An online shop",
+          "effects": [
+            {
+              "var": "web",
+              "op": "set",
+              "value": 1
+            },
+            {
+              "var": "complexity",
+              "op": "add",
+              "value": 2
+            }
+          ],
+          "transitions": []
+        },
+        {
+          "id": "portal",
+          "label": "A customer portal with self-care (accounts, billing, support)",
+          "effects": [
+            {
+              "var": "web",
+              "op": "set",
+              "value": 1
+            },
+            {
+              "var": "complexity",
+              "op": "add",
+              "value": 5
+            },
+            {
+              "var": "need_arch",
+              "op": "add",
+              "value": 1
+            },
+            {
+              "var": "need_dev",
+              "op": "add",
+              "value": 2
+            },
+            {
+              "var": "fit",
+              "op": "add",
+              "value": 2
+            }
+          ],
+          "transitions": []
+        },
+        {
+          "id": "mobile_app",
+          "label": "A mobile app",
+          "effects": [
+            {
+              "var": "mobile",
+              "op": "set",
+              "value": 1
+            },
+            {
+              "var": "complexity",
+              "op": "add",
+              "value": 3
+            },
+            {
+              "var": "need_dev",
+              "op": "add",
+              "value": 2
+            }
+          ],
+          "transitions": []
+        },
+        {
+          "id": "omni",
+          "label": "A web portal plus companion iOS / Android apps",
+          "effects": [
+            {
+              "var": "web",
+              "op": "set",
+              "value": 1
+            },
+            {
+              "var": "mobile",
+              "op": "set",
+              "value": 1
+            },
+            {
+              "var": "complexity",
+              "op": "add",
+              "value": 7
+            },
+            {
+              "var": "need_arch",
+              "op": "add",
+              "value": 2
+            },
+            {
+              "var": "need_dev",
+              "op": "add",
+              "value": 2
+            },
+            {
+              "var": "fit",
+              "op": "add",
+              "value": 3
+            }
+          ],
+          "transitions": []
+        },
+        {
+          "id": "internal",
+          "label": "An internal enterprise platform (workflows, dashboards, integrations)",
+          "effects": [
+            {
+              "var": "web",
+              "op": "set",
+              "value": 1
+            },
+            {
+              "var": "complexity",
+              "op": "add",
+              "value": 4
+            },
+            {
+              "var": "need_arch",
+              "op": "add",
+              "value": 1
+            },
+            {
+              "var": "need_dev",
+              "op": "add",
+              "value": 2
+            },
+            {
+              "var": "fit",
+              "op": "add",
+              "value": 1
+            }
+          ],
+          "transitions": []
+        },
+        {
+          "id": "desktop",
+          "label": "Desktop software, embedded or a game",
+          "effects": [
+            {
+              "var": "off_platform",
+              "op": "set",
+              "value": 1
+            }
+          ],
+          "transitions": [
+            {
+              "id": "t5",
+              "to": "off_platform"
+            }
+          ]
+        }
+      ],
+      "transitions": [
+        {
+          "id": "t6",
+          "to": "size",
+          "when": {
+            "type": "not",
+            "condition": {
+              "type": "visited",
+              "node": "size"
+            }
+          },
+          "label": "size not asked yet"
+        },
+        {
+          "id": "t7",
+          "to": "build_router"
+        }
+      ]
+    },
+    {
+      "id": "size",
+      "kind": "question",
+      "title": "How large is your organisation?",
+      "body": "",
+      "onEnter": [],
+      "choices": [
+        {
+          "id": "s1",
+          "label": "Fewer than 10 people",
+          "effects": [
+            {
+              "var": "size",
+              "op": "set",
+              "value": 1
+            },
+            {
+              "var": "fit",
+              "op": "add",
+              "value": -3
+            }
+          ],
+          "transitions": []
+        },
+        {
+          "id": "s2",
+          "label": "10 – 50 people",
+          "effects": [
+            {
+              "var": "size",
+              "op": "set",
+              "value": 2
+            },
+            {
+              "var": "fit",
+              "op": "add",
+              "value": -1
+            }
+          ],
+          "transitions": []
+        },
+        {
+          "id": "s3",
+          "label": "50 – 250 people",
+          "effects": [
+            {
+              "var": "size",
+              "op": "set",
+              "value": 3
+            },
+            {
+              "var": "fit",
+              "op": "add",
+              "value": 2
+            }
+          ],
+          "transitions": []
+        },
+        {
+          "id": "s4",
+          "label": "250 – 2,000 people",
+          "effects": [
+            {
+              "var": "size",
+              "op": "set",
+              "value": 4
+            },
+            {
+              "var": "fit",
+              "op": "add",
+              "value": 3
+            }
+          ],
+          "transitions": []
+        },
+        {
+          "id": "s5",
+          "label": "More than 2,000 people",
+          "effects": [
+            {
+              "var": "size",
+              "op": "set",
+              "value": 5
+            },
+            {
+              "var": "fit",
+              "op": "add",
+              "value": 4
+            }
+          ],
+          "transitions": []
+        }
+      ],
+      "transitions": [
+        {
+          "id": "t8",
+          "to": "build_router",
+          "when": {
+            "type": "compare",
+            "left": {
+              "var": "intent_build"
+            },
+            "op": "eq",
+            "right": 1
+          }
+        },
+        {
+          "id": "t9",
+          "to": "pains",
+          "when": {
+            "type": "compare",
+            "left": {
+              "var": "intent_improve"
+            },
+            "op": "eq",
+            "right": 1
+          }
+        },
+        {
+          "id": "t10",
+          "to": "advice_topic",
+          "when": {
+            "type": "compare",
+            "left": {
+              "var": "intent_advice"
+            },
+            "op": "eq",
+            "right": 1
+          }
+        },
+        {
+          "id": "t11",
+          "to": "explore"
+        }
+      ]
+    },
+    {
+      "id": "explore",
+      "kind": "question",
+      "title": "What would be most useful to you right now?",
+      "body": "No problem – let's see where we could help.",
+      "onEnter": [],
+      "choices": [
+        {
+          "id": "x_build",
+          "label": "Planning a new digital product",
+          "effects": [
+            {
+              "var": "intent_build",
+              "op": "set",
+              "value": 1
+            }
+          ],
+          "transitions": [
+            {
+              "id": "t12",
+              "to": "what_build"
+            }
+          ]
+        },
+        {
+          "id": "x_improve",
+          "label": "Making an existing system faster, more stable or easier to release",
+          "effects": [
+            {
+              "var": "intent_improve",
+              "op": "set",
+              "value": 1
+            }
+          ],
+          "transitions": [
+            {
+              "id": "t13",
+              "to": "pains"
+            }
+          ]
+        },
+        {
+          "id": "x_advice",
+          "label": "Talking to an architect about our technology choices",
+          "effects": [
+            {
+              "var": "intent_advice",
+              "op": "set",
+              "value": 1
+            }
+          ],
+          "transitions": [
+            {
+              "id": "t14",
+              "to": "advice_topic"
+            }
+          ]
+        },
+        {
+          "id": "x_curious",
+          "label": "Honestly, just curious",
+          "effects": [],
+          "transitions": [
+            {
+              "id": "t15",
+              "to": "curious"
+            }
+          ]
+        }
+      ],
+      "transitions": []
+    },
+    {
+      "id": "build_router",
+      "kind": "router",
+      "title": "Is this a small-business website?",
+      "body": "",
+      "onEnter": [],
+      "choices": [],
+      "transitions": [
+        {
+          "id": "t16",
+          "to": "diy_site",
+          "when": {
+            "type": "all",
+            "conditions": [
+              {
+                "type": "compare",
+                "left": {
+                  "var": "size"
+                },
+                "op": "lte",
+                "right": 2
+              },
+              {
+                "type": "compare",
+                "left": {
+                  "var": "complexity"
+                },
+                "op": "lte",
+                "right": 2
+              }
+            ]
+          },
+          "label": "small company, simple site"
+        },
+        {
+          "id": "t17",
+          "to": "budget",
+          "when": {
+            "type": "compare",
+            "left": {
+              "var": "size"
+            },
+            "op": "lte",
+            "right": 2
+          },
+          "label": "small company, ambitious product"
+        },
+        {
+          "id": "t18",
+          "to": "integrations"
+        }
+      ],
+      "notes": "Small companies with a simple website get pointed to off-the-shelf tools straight away."
+    },
+    {
+      "id": "integrations",
+      "kind": "question",
+      "title": "Does it need to integrate with your existing systems?",
+      "body": "Think CRM, ERP, payment providers, single sign-on, legacy back-ends…",
+      "onEnter": [],
+      "choices": [
+        {
+          "id": "int_many",
+          "label": "Yes, several core systems (ERP, CRM, SSO, payments)",
+          "effects": [
+            {
+              "var": "complexity",
+              "op": "add",
+              "value": 4
+            },
+            {
+              "var": "need_arch",
+              "op": "add",
+              "value": 2
+            },
+            {
+              "var": "fit",
+              "op": "add",
+              "value": 2
+            }
+          ],
+          "transitions": []
+        },
+        {
+          "id": "int_some",
+          "label": "A handful of third-party services",
+          "effects": [
+            {
+              "var": "complexity",
+              "op": "add",
+              "value": 2
+            },
+            {
+              "var": "need_arch",
+              "op": "add",
+              "value": 1
+            }
+          ],
+          "transitions": []
+        },
+        {
+          "id": "int_none",
+          "label": "No, it's standalone",
+          "effects": [],
+          "transitions": []
+        }
+      ],
+      "transitions": [
+        {
+          "id": "t19",
+          "to": "team"
+        }
+      ]
+    },
+    {
+      "id": "team",
+      "kind": "question",
+      "title": "Do you have your own development team?",
+      "body": "",
+      "onEnter": [],
+      "choices": [
+        {
+          "id": "team_strong",
+          "label": "Yes, a strong in-house team – we need specialists to support them",
+          "effects": [
+            {
+              "var": "has_team",
+              "op": "set",
+              "value": 1
+            },
+            {
+              "var": "need_devops",
+              "op": "add",
+              "value": 1
+            },
+            {
+              "var": "need_qa",
+              "op": "add",
+              "value": 1
+            },
+            {
+              "var": "need_arch",
+              "op": "add",
+              "value": 1
+            }
+          ],
+          "transitions": []
+        },
+        {
+          "id": "team_small",
+          "label": "A small team that needs extra hands",
+          "effects": [
+            {
+              "var": "has_team",
+              "op": "set",
+              "value": 1
+            },
+            {
+              "var": "need_dev",
+              "op": "add",
+              "value": 1
+            },
+            {
+              "var": "need_qa",
+              "op": "add",
+              "value": 1
+            }
+          ],
+          "transitions": []
+        },
+        {
+          "id": "team_none",
+          "label": "No, we need a partner to deliver end-to-end",
+          "effects": [
+            {
+              "var": "need_dev",
+              "op": "add",
+              "value": 2
+            },
+            {
+              "var": "need_qa",
+              "op": "add",
+              "value": 1
+            },
+            {
+              "var": "need_devops",
+              "op": "add",
+              "value": 1
+            },
+            {
+              "var": "fit",
+              "op": "add",
+              "value": 1
+            }
+          ],
+          "transitions": []
+        }
+      ],
+      "transitions": [
+        {
+          "id": "t20",
+          "to": "budget",
+          "when": {
+            "type": "compare",
+            "left": {
+              "var": "budget"
+            },
+            "op": "eq",
+            "right": 0
+          },
+          "label": "budget unknown"
+        },
+        {
+          "id": "t21",
+          "to": "compliance",
+          "when": {
+            "type": "all",
+            "conditions": [
+              {
+                "type": "compare",
+                "left": {
+                  "var": "size"
+                },
+                "op": "gte",
+                "right": 3
+              },
+              {
+                "type": "not",
+                "condition": {
+                  "type": "visited",
+                  "node": "compliance"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "t22",
+          "to": "evaluate"
+        }
+      ]
+    },
+    {
+      "id": "budget",
+      "kind": "question",
+      "title": "What budget range are you considering?",
+      "body": "A rough idea is enough – it helps us suggest the right kind of engagement.",
+      "onEnter": [],
+      "choices": [
+        {
+          "id": "b1",
+          "label": "Under €15k",
+          "effects": [
+            {
+              "var": "budget",
+              "op": "set",
+              "value": 1
+            },
+            {
+              "var": "fit",
+              "op": "add",
+              "value": -3
+            }
+          ],
+          "transitions": []
+        },
+        {
+          "id": "b2",
+          "label": "€15k – €75k",
+          "effects": [
+            {
+              "var": "budget",
+              "op": "set",
+              "value": 2
+            }
+          ],
+          "transitions": []
+        },
+        {
+          "id": "b3",
+          "label": "€75k – €300k",
+          "effects": [
+            {
+              "var": "budget",
+              "op": "set",
+              "value": 3
+            },
+            {
+              "var": "fit",
+              "op": "add",
+              "value": 2
+            }
+          ],
+          "transitions": []
+        },
+        {
+          "id": "b4",
+          "label": "Over €300k",
+          "effects": [
+            {
+              "var": "budget",
+              "op": "set",
+              "value": 4
+            },
+            {
+              "var": "fit",
+              "op": "add",
+              "value": 4
+            }
+          ],
+          "transitions": []
+        },
+        {
+          "id": "b_unknown",
+          "label": "Not defined yet",
+          "effects": [
+            {
+              "var": "budget",
+              "op": "set",
+              "value": 2
+            }
+          ],
+          "transitions": []
+        }
+      ],
+      "transitions": [
+        {
+          "id": "t23",
+          "to": "compliance",
+          "when": {
+            "type": "all",
+            "conditions": [
+              {
+                "type": "compare",
+                "left": {
+                  "var": "size"
+                },
+                "op": "gte",
+                "right": 3
+              },
+              {
+                "type": "not",
+                "condition": {
+                  "type": "visited",
+                  "node": "compliance"
+                }
+              }
+            ]
+          },
+          "label": "larger company"
+        },
+        {
+          "id": "t24",
+          "to": "evaluate"
+        }
+      ]
+    },
+    {
+      "id": "compliance",
+      "kind": "question",
+      "title": "Do you operate in a regulated or high-stakes environment?",
+      "body": "For example finance, healthcare, the public sector – or anywhere downtime costs real money.",
+      "onEnter": [],
+      "choices": [
+        {
+          "id": "reg_yes",
+          "label": "Yes",
+          "effects": [
+            {
+              "var": "regulated",
+              "op": "set",
+              "value": 1
+            },
+            {
+              "var": "need_arch",
+              "op": "add",
+              "value": 1
+            },
+            {
+              "var": "need_qa",
+              "op": "add",
+              "value": 1
+            },
+            {
+              "var": "complexity",
+              "op": "add",
+              "value": 2
+            },
+            {
+              "var": "fit",
+              "op": "add",
+              "value": 1
+            }
+          ],
+          "transitions": []
+        },
+        {
+          "id": "reg_no",
+          "label": "No",
+          "effects": [],
+          "transitions": []
+        }
+      ],
+      "transitions": [
+        {
+          "id": "t25",
+          "to": "evaluate"
+        }
+      ]
+    },
+    {
+      "id": "pains",
+      "kind": "question",
+      "title": "What is hurting the most?",
+      "body": "Pick one at a time – you can add more afterwards. Selected so far: {{pains}}.",
+      "onEnter": [],
+      "choices": [
+        {
+          "id": "p_release",
+          "label": "Releases are slow, manual or scary",
+          "effects": [
+            {
+              "var": "pain_release",
+              "op": "set",
+              "value": 1
+            },
+            {
+              "var": "need_devops",
+              "op": "add",
+              "value": 2
+            },
+            {
+              "var": "pains",
+              "op": "add",
+              "value": 1
+            },
+            {
+              "var": "fit",
+              "op": "add",
+              "value": 1
+            }
+          ],
+          "transitions": [],
+          "showIf": {
+            "type": "compare",
+            "left": {
+              "var": "pain_release"
+            },
+            "op": "eq",
+            "right": 0
+          }
+        },
+        {
+          "id": "p_outage",
+          "label": "Outages and production incidents",
+          "effects": [
+            {
+              "var": "pain_outage",
+              "op": "set",
+              "value": 1
+            },
+            {
+              "var": "need_devops",
+              "op": "add",
+              "value": 1
+            },
+            {
+              "var": "need_arch",
+              "op": "add",
+              "value": 1
+            },
+            {
+              "var": "pains",
+              "op": "add",
+              "value": 1
+            },
+            {
+              "var": "fit",
+              "op": "add",
+              "value": 1
+            }
+          ],
+          "transitions": [],
+          "showIf": {
+            "type": "compare",
+            "left": {
+              "var": "pain_outage"
+            },
+            "op": "eq",
+            "right": 0
+          }
+        },
+        {
+          "id": "p_bugs",
+          "label": "Too many bugs reach our users",
+          "effects": [
+            {
+              "var": "pain_bugs",
+              "op": "set",
+              "value": 1
+            },
+            {
+              "var": "need_qa",
+              "op": "add",
+              "value": 2
+            },
+            {
+              "var": "pains",
+              "op": "add",
+              "value": 1
+            },
+            {
+              "var": "fit",
+              "op": "add",
+              "value": 1
+            }
+          ],
+          "transitions": [],
+          "showIf": {
+            "type": "compare",
+            "left": {
+              "var": "pain_bugs"
+            },
+            "op": "eq",
+            "right": 0
+          }
+        },
+        {
+          "id": "p_scale",
+          "label": "The system can't keep up with growth",
+          "effects": [
+            {
+              "var": "pain_scale",
+              "op": "set",
+              "value": 1
+            },
+            {
+              "var": "need_arch",
+              "op": "add",
+              "value": 2
+            },
+            {
+              "var": "complexity",
+              "op": "add",
+              "value": 3
+            },
+            {
+              "var": "pains",
+              "op": "add",
+              "value": 1
+            },
+            {
+              "var": "fit",
+              "op": "add",
+              "value": 1
+            }
+          ],
+          "transitions": [],
+          "showIf": {
+            "type": "compare",
+            "left": {
+              "var": "pain_scale"
+            },
+            "op": "eq",
+            "right": 0
+          }
+        },
+        {
+          "id": "p_capacity",
+          "label": "We can't ship features fast enough",
+          "effects": [
+            {
+              "var": "pain_capacity",
+              "op": "set",
+              "value": 1
+            },
+            {
+              "var": "need_dev",
+              "op": "add",
+              "value": 2
+            },
+            {
+              "var": "pains",
+              "op": "add",
+              "value": 1
+            },
+            {
+              "var": "fit",
+              "op": "add",
+              "value": 1
+            }
+          ],
+          "transitions": [],
+          "showIf": {
+            "type": "compare",
+            "left": {
+              "var": "pain_capacity"
+            },
+            "op": "eq",
+            "right": 0
+          }
+        },
+        {
+          "id": "p_done",
+          "label": "That's everything",
+          "effects": [],
+          "transitions": [
+            {
+              "id": "t26",
+              "to": "platforms"
+            }
+          ],
+          "showIf": {
+            "type": "compare",
+            "left": {
+              "var": "pains"
+            },
+            "op": "gte",
+            "right": 1
+          }
+        }
+      ],
+      "transitions": [
+        {
+          "id": "t27",
+          "to": "pains",
+          "when": {
+            "type": "compare",
+            "left": {
+              "var": "pains"
+            },
+            "op": "lt",
+            "right": 3
+          },
+          "label": "ask for another pain point"
+        },
+        {
+          "id": "t28",
+          "to": "platforms",
+          "label": "three is enough"
+        }
+      ]
+    },
+    {
+      "id": "platforms",
+      "kind": "question",
+      "title": "Which platforms does the system run on?",
+      "body": "",
+      "onEnter": [],
+      "choices": [
+        {
+          "id": "pl_web",
+          "label": "Web",
+          "effects": [
+            {
+              "var": "web",
+              "op": "set",
+              "value": 1
+            }
+          ],
+          "transitions": []
+        },
+        {
+          "id": "pl_mobile",
+          "label": "Mobile (iOS / Android)",
+          "effects": [
+            {
+              "var": "mobile",
+              "op": "set",
+              "value": 1
+            }
+          ],
+          "transitions": []
+        },
+        {
+          "id": "pl_both",
+          "label": "Both web and mobile",
+          "effects": [
+            {
+              "var": "web",
+              "op": "set",
+              "value": 1
+            },
+            {
+              "var": "mobile",
+              "op": "set",
+              "value": 1
+            },
+            {
+              "var": "complexity",
+              "op": "add",
+              "value": 2
+            }
+          ],
+          "transitions": []
+        },
+        {
+          "id": "pl_other",
+          "label": "Mostly desktop, mainframe or embedded",
+          "effects": [
+            {
+              "var": "off_platform",
+              "op": "set",
+              "value": 1
+            }
+          ],
+          "transitions": []
+        }
+      ],
+      "transitions": [
+        {
+          "id": "t29",
+          "to": "off_platform",
+          "when": {
+            "type": "compare",
+            "left": {
+              "var": "off_platform"
+            },
+            "op": "eq",
+            "right": 1
+          }
+        },
+        {
+          "id": "t30",
+          "to": "team",
+          "when": {
+            "type": "not",
+            "condition": {
+              "type": "visited",
+              "node": "team"
+            }
+          }
+        },
+        {
+          "id": "t31",
+          "to": "budget"
+        }
+      ]
+    },
+    {
+      "id": "advice_topic",
+      "kind": "question",
+      "title": "What would you like advice on?",
+      "body": "",
+      "onEnter": [],
+      "choices": [
+        {
+          "id": "a_arch",
+          "label": "Reviewing the architecture of an existing system",
+          "effects": [
+            {
+              "var": "need_arch",
+              "op": "add",
+              "value": 2
+            }
+          ],
+          "transitions": []
+        },
+        {
+          "id": "a_stack",
+          "label": "Choosing a technology stack for a new product",
+          "effects": [
+            {
+              "var": "need_arch",
+              "op": "add",
+              "value": 1
+            },
+            {
+              "var": "need_dev",
+              "op": "add",
+              "value": 1
+            }
+          ],
+          "transitions": []
+        },
+        {
+          "id": "a_devops",
+          "label": "Cloud, CI/CD and DevOps strategy",
+          "effects": [
+            {
+              "var": "need_devops",
+              "op": "add",
+              "value": 2
+            }
+          ],
+          "transitions": []
+        },
+        {
+          "id": "a_qa",
+          "label": "Test strategy and automation",
+          "effects": [
+            {
+              "var": "need_qa",
+              "op": "add",
+              "value": 2
+            }
+          ],
+          "transitions": []
+        }
+      ],
+      "transitions": [
+        {
+          "id": "t32",
+          "to": "adhoc_consult",
+          "when": {
+            "type": "compare",
+            "left": {
+              "var": "size"
+            },
+            "op": "lte",
+            "right": 2
+          },
+          "label": "small company"
+        },
+        {
+          "id": "t33",
+          "to": "advice_scope"
+        }
+      ]
+    },
+    {
+      "id": "advice_scope",
+      "kind": "question",
+      "title": "What kind of engagement are you after?",
+      "body": "",
+      "onEnter": [],
+      "choices": [
+        {
+          "id": "scope_oneoff",
+          "label": "A one-off review with a written report",
+          "effects": [],
+          "transitions": [
+            {
+              "id": "t34",
+              "to": "arch_review"
+            }
+          ]
+        },
+        {
+          "id": "scope_ongoing",
+          "label": "Ongoing guidance alongside our team",
+          "effects": [
+            {
+              "var": "fit",
+              "op": "add",
+              "value": 2
+            }
+          ],
+          "transitions": []
+        },
+        {
+          "id": "scope_unsure",
+          "label": "Not sure yet",
+          "effects": [],
+          "transitions": []
+        }
+      ],
+      "transitions": [
+        {
+          "id": "t35",
+          "to": "budget"
+        }
+      ]
+    },
+    {
+      "id": "evaluate",
+      "kind": "router",
+      "title": "Pick a recommendation",
+      "body": "",
+      "onEnter": [],
+      "choices": [],
+      "transitions": [
+        {
+          "id": "t36",
+          "to": "off_platform",
+          "when": {
+            "type": "compare",
+            "left": {
+              "var": "off_platform"
+            },
+            "op": "eq",
+            "right": 1
+          }
+        },
+        {
+          "id": "t37",
+          "to": "diy_site",
+          "when": {
+            "type": "all",
+            "conditions": [
+              {
+                "type": "compare",
+                "left": {
+                  "var": "size"
+                },
+                "op": "lte",
+                "right": 2
+              },
+              {
+                "type": "compare",
+                "left": {
+                  "var": "complexity"
+                },
+                "op": "lte",
+                "right": 2
+              }
+            ]
+          },
+          "label": "small & simple"
+        },
+        {
+          "id": "t38",
+          "to": "adhoc_consult",
+          "when": {
+            "type": "all",
+            "conditions": [
+              {
+                "type": "compare",
+                "left": {
+                  "var": "size"
+                },
+                "op": "lte",
+                "right": 2
+              },
+              {
+                "type": "any",
+                "conditions": [
+                  {
+                    "type": "compare",
+                    "left": {
+                      "var": "budget"
+                    },
+                    "op": "lte",
+                    "right": 2
+                  },
+                  {
+                    "type": "compare",
+                    "left": {
+                      "var": "fit"
+                    },
+                    "op": "lt",
+                    "right": 3
+                  }
+                ]
+              }
+            ]
+          },
+          "label": "small company, limited budget"
+        },
+        {
+          "id": "t39",
+          "to": "full_delivery",
+          "when": {
+            "type": "all",
+            "conditions": [
+              {
+                "type": "compare",
+                "left": {
+                  "var": "fit"
+                },
+                "op": "gte",
+                "right": 8
+              },
+              {
+                "type": "compare",
+                "left": {
+                  "var": "need_dev"
+                },
+                "op": "gte",
+                "right": 2
+              }
+            ]
+          },
+          "label": "strong fit, needs delivery"
+        },
+        {
+          "id": "t40",
+          "to": "devops_engagement",
+          "when": {
+            "type": "all",
+            "conditions": [
+              {
+                "type": "compare",
+                "left": {
+                  "var": "fit"
+                },
+                "op": "gte",
+                "right": 5
+              },
+              {
+                "type": "compare",
+                "left": {
+                  "var": "need_devops"
+                },
+                "op": "gte",
+                "right": 2
+              },
+              {
+                "type": "compare",
+                "left": {
+                  "var": "need_devops"
+                },
+                "op": "gte",
+                "right": {
+                  "var": "need_qa"
+                }
+              }
+            ]
+          },
+          "label": "DevOps is the main need"
+        },
+        {
+          "id": "t41",
+          "to": "qa_engagement",
+          "when": {
+            "type": "all",
+            "conditions": [
+              {
+                "type": "compare",
+                "left": {
+                  "var": "fit"
+                },
+                "op": "gte",
+                "right": 5
+              },
+              {
+                "type": "compare",
+                "left": {
+                  "var": "need_qa"
+                },
+                "op": "gte",
+                "right": 2
+              }
+            ]
+          },
+          "label": "testing is the main need"
+        },
+        {
+          "id": "t42",
+          "to": "arch_partnership",
+          "when": {
+            "type": "all",
+            "conditions": [
+              {
+                "type": "compare",
+                "left": {
+                  "var": "fit"
+                },
+                "op": "gte",
+                "right": 5
+              },
+              {
+                "type": "compare",
+                "left": {
+                  "var": "need_arch"
+                },
+                "op": "gte",
+                "right": 2
+              }
+            ]
+          },
+          "label": "architecture is the main need"
+        },
+        {
+          "id": "t43",
+          "to": "adhoc_consult",
+          "when": {
+            "type": "compare",
+            "left": {
+              "var": "size"
+            },
+            "op": "lte",
+            "right": 2
+          },
+          "label": "small company"
+        },
+        {
+          "id": "t44",
+          "to": "discovery_call"
+        }
+      ],
+      "notes": "Order matters: the first matching rule wins. Compares counters with each other (need_devops ≥ need_qa)."
+    },
+    {
+      "id": "diy_site",
+      "kind": "outcome",
+      "title": "An off-the-shelf platform is your best bet",
+      "body": "For a company website or a small shop a custom build would be overkill. **WordPress**, **Webflow**, **Squarespace** or **Shopify** will get you online in days, for a fraction of the cost.\n\nWe specialise in large, integration-heavy platforms – but if you would like an expert to sanity-check your plans, we also offer short ad-hoc consultations.",
+      "onEnter": [],
+      "choices": [
+        {
+          "id": "diy_consult",
+          "label": "I'd still like a short consultation",
+          "effects": [],
+          "transitions": [
+            {
+              "id": "t45",
+              "to": "adhoc_consult"
+            }
+          ]
+        }
+      ],
+      "transitions": [],
+      "outcome": {
+        "tone": "neutral"
+      }
+    },
+    {
+      "id": "adhoc_consult",
+      "kind": "outcome",
+      "title": "Ad-hoc expert consultation",
+      "body": "Book a one- or two-hour session with one of our senior architects. Ideal for smaller teams that need a second opinion on technology choices, hosting, security or vendor proposals – no long-term commitment.",
+      "onEnter": [],
+      "choices": [],
+      "transitions": [],
+      "outcome": {
+        "tone": "positive",
+        "cta": {
+          "label": "Book a session",
+          "url": "mailto:hello@kestrel.example?subject=Ad-hoc%20consultation"
+        }
+      }
+    },
+    {
+      "id": "full_delivery",
+      "kind": "outcome",
+      "title": "End-to-end delivery partnership",
+      "body": "You're right in our sweet spot (fit score {{fit}}, complexity {{complexity}}). We'd start with a two-week discovery workshop, then set up a cross-functional team – architects, web & mobile developers, DevOps and test engineers – to design, build and run your platform.",
+      "onEnter": [],
+      "choices": [],
+      "transitions": [],
+      "outcome": {
+        "tone": "positive",
+        "cta": {
+          "label": "Schedule a discovery workshop",
+          "url": "mailto:hello@kestrel.example?subject=Discovery%20workshop"
+        }
+      }
+    },
+    {
+      "id": "devops_engagement",
+      "kind": "outcome",
+      "title": "DevOps & platform engineering",
+      "body": "Your biggest wins are in how software gets built, shipped and operated. Our DevOps engineers can set up CI/CD, infrastructure as code, observability and on-call practices alongside your team.",
+      "onEnter": [],
+      "choices": [],
+      "transitions": [],
+      "outcome": {
+        "tone": "positive",
+        "cta": {
+          "label": "Talk to a DevOps lead",
+          "url": "mailto:hello@kestrel.example?subject=DevOps"
+        }
+      }
+    },
+    {
+      "id": "qa_engagement",
+      "kind": "outcome",
+      "title": "Testing & quality engineering",
+      "body": "We can introduce a test strategy, automate regression testing for web and mobile, and embed QA engineers into your teams so fewer bugs reach your users.",
+      "onEnter": [],
+      "choices": [],
+      "transitions": [],
+      "outcome": {
+        "tone": "positive",
+        "cta": {
+          "label": "Talk to a QA lead",
+          "url": "mailto:hello@kestrel.example?subject=Quality%20engineering"
+        }
+      }
+    },
+    {
+      "id": "arch_partnership",
+      "kind": "outcome",
+      "title": "Architecture consulting",
+      "body": "A senior architect works with your team over several months: target architecture, scalability, integration strategy and technical governance.",
+      "onEnter": [],
+      "choices": [],
+      "transitions": [],
+      "outcome": {
+        "tone": "positive",
+        "cta": {
+          "label": "Talk to an architect",
+          "url": "mailto:hello@kestrel.example?subject=Architecture"
+        }
+      }
+    },
+    {
+      "id": "arch_review",
+      "kind": "outcome",
+      "title": "Architecture review",
+      "body": "A fixed-scope review of your system (typically 2–3 weeks) ending with a written report and a prioritised roadmap.",
+      "onEnter": [],
+      "choices": [],
+      "transitions": [],
+      "outcome": {
+        "tone": "positive",
+        "cta": {
+          "label": "Request a review",
+          "url": "mailto:hello@kestrel.example?subject=Architecture%20review"
+        }
+      }
+    },
+    {
+      "id": "discovery_call",
+      "kind": "outcome",
+      "title": "Let's talk",
+      "body": "We can't tell from these answers alone – a 30-minute call with us will clear it up quickly.",
+      "onEnter": [],
+      "choices": [],
+      "transitions": [],
+      "outcome": {
+        "tone": "neutral",
+        "cta": {
+          "label": "Book a call",
+          "url": "mailto:hello@kestrel.example?subject=Intro%20call"
+        }
+      }
+    },
+    {
+      "id": "off_platform",
+      "kind": "outcome",
+      "title": "We're probably not the right partner",
+      "body": "We focus exclusively on web and mobile platforms, so for desktop, embedded or game development a specialised studio will serve you better.",
+      "onEnter": [],
+      "choices": [
+        {
+          "id": "off_also_web",
+          "label": "We also have web or mobile needs",
+          "effects": [
+            {
+              "var": "off_platform",
+              "op": "set",
+              "value": 0
+            }
+          ],
+          "transitions": [
+            {
+              "id": "t46",
+              "to": "explore"
+            }
+          ]
+        }
+      ],
+      "transitions": [],
+      "outcome": {
+        "tone": "negative"
+      }
+    },
+    {
+      "id": "curious",
+      "kind": "outcome",
+      "title": "Thanks for stopping by!",
+      "body": "We help larger organisations design, build, ship and test web and mobile platforms. Come back any time.",
+      "onEnter": [],
+      "choices": [
+        {
+          "id": "curious_back",
+          "label": "Actually, I do have a project in mind",
+          "effects": [],
+          "transitions": [
+            {
+              "id": "t47",
+              "to": "explore"
+            }
+          ]
+        }
+      ],
+      "transitions": [],
+      "outcome": {
+        "tone": "neutral"
+      }
+    }
+  ]
+}
