@@ -107,7 +107,7 @@ export function NodeEditor({ node, onPlayFrom }: { node: TreeNode; onPlayFrom?: 
           )}
           {onPlayFrom && (
             <button type="button" onClick={onPlayFrom}>
-              ▶ Play
+              ▶ Preview
             </button>
           )}
           <button type="button" onClick={duplicate}>

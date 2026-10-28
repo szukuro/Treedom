@@ -1,0 +1,63 @@
+/* --- player (shared by the viewer and the editor preview) ------------------------------------------------------------ */
+
+.player {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+}
+.card .body {
+  line-height: 1.55;
+}
+.node-card.kind-outcome {
+  border-top: 5px solid var(--muted);
+}
+.node-card.tone-positive {
+  border-top-color: var(--outcome);
+}
+.node-card.tone-negative {
+  border-top-color: var(--danger);
+}
+.outcome-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.choices {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 18px;
+}
+.choice {
+  text-align: left;
+  padding: 12px 16px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 15px;
+}
+.choice:hover {
+  background: var(--accent-soft);
+}
+.cta {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 10px 18px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+}
+.player-nav {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+.progress {
+  margin-bottom: 6px;
+}

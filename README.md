@@ -4,14 +4,66 @@ A TypeScript/React toolkit for building **stateful, non-linear decision trees**.
 
 Unlike a linear wizard (for example the [RxJS operator decision tree](https://rxjs.dev/operator-decision-tree)), a Treedom tree keeps **state**. You define numeric variables (counters and flags). Choices change those variables, and each transition can check them, so the next step depends on everything answered so far, not only on the latest answer. Loops, skipped questions, re-entry from a result screen and hidden scoring steps are all supported.
 
+Treedom has two separate apps that share one engine:
+
+| App | Who it's for | What it does |
+| --- | --- | --- |
+| **Editor** (`apps/editor`) | Authors, behind a login | Build trees, try them out in **Preview**, then **Export `decision.json`**. Drafts are stored in the browser's localStorage. |
+| **Viewer** (`apps/viewer`) | Visitors | Read-only. Fetches `decision.json` from the folder it is hosted in and plays it. It contains no editor, login or storage code. |
+
 ```bash
 npm install
-npm run dev        # open the studio at http://localhost:5173
-npm test           # engine + example tests
-npm run build      # type-check and build a static bundle into dist/
+npm run dev          # editor  → http://localhost:5173  (login: editor / treedom)
+npm run dev:viewer   # viewer  → http://localhost:5174  (serves apps/viewer/public/decision.json)
+npm test             # engine, API layer, URL resolution, example
+npm run build        # → dist/editor/ and dist/viewer/, each a self-contained static folder
 ```
 
-On first launch the studio opens the bundled **IT services example**. Trees are saved to `localStorage` as you edit. Use **Export** and **Import** to move them around as `.json` files.
+### Publishing a tree (no server code needed)
+
+1. Sign in to the editor, build the tree and check it in the **Preview** tab.
+2. Click **⬇ Export decision.json**.
+3. Upload `dist/viewer/` to any static host, together with your `decision.json`:
+
+```
+example.com/decision/index.html      ← dist/viewer/index.html
+example.com/decision/assets/…        ← dist/viewer/assets/
+example.com/decision/decision.json   ← the exported file (replaces the bundled example)
+```
+
+The viewer resolves `decision.json` relative to its own page. `…/decision/index.html`, `…/decision/` and `…/decision` (no trailing slash) all load `…/decision/decision.json`. See `src/viewer/resolveDecisionUrl.ts`. All asset URLs are relative, so the folder can live under any path. The file is fetched with `cache: no-cache`, so re-uploading it takes effect immediately.
+
+### Editor login
+
+The credentials are hardcoded in `src/api/local/credentials.ts`: `editor` / `treedom` by default. You can override them at build time with `VITE_EDITOR_USERNAME` and `VITE_EDITOR_PASSWORD`. **This is a UX gate, not security.** The values ship inside the JavaScript bundle, so don't deploy the editor anywhere it must be protected. The login lasts for the browser tab (sessionStorage).
+
+## Project structure
+
+```
+apps/
+  editor/ index.html, main.tsx        editor entry point
+  viewer/ index.html, main.tsx        viewer entry point
+          public/decision.json        default tree the viewer serves (the example)
+src/
+  core/      engine, types, conditions, validation, (de)serialisation (no React, no I/O)
+  api/       every call that will eventually go to a backend (see below)
+  player/    DecisionTreePlayer: the presentational player shared by viewer and Preview
+  viewer/    DecisionTreeViewer: fetches the published tree and renders the player
+  editor/    EditorApp (login gate), EditorStudio, editor forms, graph, Preview, JSON tab
+  examples/  the IT services example tree
+```
+
+## API layer: swapping in a real backend
+
+Everything that will eventually talk to a server is in `src/api/`, behind async interfaces (`src/api/types.ts`):
+
+| Interface | Used by | MVP implementation | Template for a real API |
+| --- | --- | --- | --- |
+| `AuthApi`: `login`, `logout`, `currentSession` | editor login gate | `local/localAuthApi.ts` (hardcoded credentials, sessionStorage) | `http/httpAuthApi.ts` (token-based REST) |
+| `TreeRepository`: `list`, `load`, `save`, `remove` | editor library and autosave | `local/localTreeRepository.ts` (localStorage) | `http/httpTreeRepository.ts` (`/trees/:id` REST) |
+| `PublishedTreeSource`: `load(url)` | viewer | `http/fetchPublishedTreeSource.ts` (static `decision.json`) | same, pointed at an API endpoint |
+
+The components never import an implementation directly. They get one from a single wiring file per app, `src/api/editorApi.ts` or `src/api/viewerApi.ts`. To move to a backend, implement or adapt the HTTP templates and change those wiring files. `editorApi.ts` contains a commented example. The interfaces are async even where localStorage is synchronous, so call sites don't change. The HTTP templates compile but are not wired in or tested against a real server. Browser-only concerns stay in the editor and are not part of the API layer: file download/import (`src/editor/fileIO.ts`) and the "last opened tree" preference (`src/editor/preferences.ts`).
 
 ## The model
 
@@ -33,46 +85,33 @@ On first launch the studio opens the bundled **IT services example**. Trees are 
 
 `Back` restores the previous snapshot, and the player keeps a full trace of every step for debugging.
 
-## The studio
+## The editor
 
-- **Editor**: the sidebar lists tree settings, state variables and all nodes. Unreachable nodes are dimmed and nodes with problems get a coloured dot. Each node has editors for:
+- **Editor tab**: the sidebar lists tree settings, state variables and all nodes. Unreachable nodes are dimmed and nodes with problems get a coloured dot. Each node has editors for:
   - its text
   - on-enter effects
   - each choice's show-if condition, effects and transitions
   - its default routing
 
-  The condition builder supports nested AND/OR/NOT groups. Renaming a node id or a variable key updates every reference, including `{{placeholders}}` in text. The **Play** button on a node starts a play-through from that node. A validation bar lists broken references, dead ends, unreachable nodes, transitions shadowed by an earlier unconditional one, and similar problems. Undo/redo is available (Ctrl+Z / Ctrl+Shift+Z).
+  The condition builder supports nested AND/OR/NOT groups. Renaming a node id or a variable key updates every reference, including `{{placeholders}}` in text. The **▶ Preview** button on a node starts a preview from that node. A validation bar lists broken references, dead ends, unreachable nodes, transitions shadowed by an earlier unconditional one, and similar problems. Undo/redo is available (Ctrl+Z / Ctrl+Shift+Z).
 - **Graph**: an automatic left-to-right layout. Dashed edges are conditional, and the last play-through is highlighted. Click a node to edit it.
-- **Play**: the player as an end user sees it, next to a live state table (changed values are highlighted) and a step trace that shows which rule fired.
+- **Preview**: the same player component the viewer uses, next to a live state table (changed values are highlighted) and a step trace that shows which rule fired.
 - **JSON**: the exact document that is stored and exported. You can edit it here and apply the changes.
 
 ## Using it as a library
 
 ```tsx
-import { DecisionTreeStudio, DecisionTreePlayer, parseTree, playPath } from './src';
+import { EditorApp, DecisionTreeViewer, DecisionTreePlayer, parseTree, playPath } from './src';
 
-// Full authoring environment
-<DecisionTreeStudio />
-
-// Just the player, e.g. embedded on a landing page
-<DecisionTreePlayer tree={parseTree(json)} />
+<EditorApp />                                   // login + authoring environment
+<DecisionTreeViewer />                          // fetches ./decision.json
+<DecisionTreeViewer src="/api/trees/42" />      // ...or any URL returning the JSON
+<DecisionTreePlayer tree={parseTree(json)} />   // just the player, for a tree you already have
 
 // Headless: the engine is plain TypeScript with no React dependency
 const session = playPath(tree, ['improve', 's3', 'p_release', 'p_done']);
 session.nodeId; session.vars; session.trace;
 ```
-
-The code is laid out as follows:
-
-- `src/core/`: framework-agnostic, pure functions with no side effects.
-  - `types.ts`: the JSON schema.
-  - `engine.ts`: sessions, choose, back and interpolation.
-  - `conditions.ts`: evaluation and descriptions.
-  - `validate.ts`: static checks.
-  - `mutations.ts`: factories and reference-preserving renames.
-  - `serialize.ts`: tolerant JSON import.
-- `src/storage/localStore.ts`: the localStorage library plus file import and export.
-- `src/ui/`: the React studio, editor, graph and player.
 
 ## The example: "Kestrel Digital – are we the right partner?"
 
@@ -89,7 +128,7 @@ The tests in `src/examples/itServices.test.ts` walk these paths. They also run t
 
 ## Storage format
 
-A tree is a single JSON document (`schemaVersion: 1`). Each tree is stored under `treedom:tree:<id>` in `localStorage`, with an index at `treedom:index`. Import fills in missing optional arrays and ids, so hand-written files can be short:
+A tree is a single JSON document (`schemaVersion: 1`). The editor exports it as `decision.json`. In the MVP, drafts are stored in localStorage under `treedom:tree:<id>`, with an index at `treedom:index`. Import fills in missing optional arrays and ids, so hand-written files can be short:
 
 ```json
 {

@@ -4,17 +4,20 @@ import { describe, expect, it } from 'vitest';
 import { parseTree, serializeTree } from '../core';
 import { createItServicesTree } from './itServices';
 
-const FILE = resolve(import.meta.dirname, '../../examples/it-services.json');
+const ROOT = resolve(import.meta.dirname, '../..');
+/** The example as a standalone file, and the copy the viewer serves by default. */
+const FILES = ['examples/it-services.json', 'apps/viewer/public/decision.json'];
 
-/** Keeps examples/it-services.json in sync. Regenerate with `npm run export-example`. */
-describe('examples/it-services.json', () => {
+/** Keeps the JSON copies in sync with the TypeScript source. Regenerate with `npm run export-example`. */
+describe.each(FILES)('%s', (file) => {
+  const path = resolve(ROOT, file);
   const json = serializeTree(createItServicesTree()) + '\n';
-  if (process.env.UPDATE_EXAMPLES) writeFileSync(FILE, json);
+  if (process.env.UPDATE_EXAMPLES) writeFileSync(path, json);
 
   it('matches the TypeScript source', () => {
-    expect(readFileSync(FILE, 'utf8')).toBe(json);
+    expect(readFileSync(path, 'utf8')).toBe(json);
   });
   it('can be imported', () => {
-    expect(parseTree(readFileSync(FILE, 'utf8'))).toEqual(createItServicesTree());
+    expect(parseTree(readFileSync(path, 'utf8'))).toEqual(createItServicesTree());
   });
 });
