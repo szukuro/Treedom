@@ -223,7 +223,7 @@ function Workspace({
       <div className="studio">
         <header className="topbar">
           <div className="brand">
-            <span className="logo">🌳</span> Treedom <span className="muted small">Editor</span>
+            <span className="logo">🌳</span> Treedom <span className="muted small wide-only">Editor</span>
           </div>
           <select className="tree-picker" value={tree.id} disabled={busy} onChange={(e) => void switchTo(e.target.value)} title="Your trees">
             {!library.some((t) => t.id === tree.id) && <option value={tree.id}>{tree.title}</option>}
@@ -247,7 +247,7 @@ function Workspace({
               Import
             </button>
             <button type="button" className="primary" onClick={exportJson} title={`Download ${PUBLISH_FILE_NAME} – put it next to the viewer's index.html to publish`}>
-              ⬇ Export {PUBLISH_FILE_NAME}
+              ⬇ Export<span className="wide-only"> {PUBLISH_FILE_NAME}</span>
             </button>
             <button type="button" disabled={busy} className="danger" onClick={remove}>
               Delete
@@ -259,16 +259,19 @@ function Workspace({
             <button type="button" onClick={history.redo} disabled={!history.canRedo} title="Redo (Ctrl+Shift+Z)">
               ↷
             </button>
-            <span className={`save-state small ${saveState === 'error' ? 'error-text' : 'muted'}`}>
-              {saveState === 'saving' ? 'Saving…' : saveState === 'error' ? 'Save failed – will retry on next change' : 'All changes saved'}
+            <span
+              className={`save-state small ${saveState === 'error' ? 'error-text' : 'muted'}`}
+              title={saveState === 'error' ? 'Saving failed – it will be retried on the next change.' : saveState === 'saving' ? 'Saving…' : 'All changes saved'}
+            >
+              {saveState === 'saving' ? 'Saving…' : saveState === 'error' ? '⚠ Not saved' : '✓ Saved'}
             </span>
           </div>
           <div className="user-box small">
             <ThemeToggle />
             {user && (
               <>
-                <span className="muted">{user.displayName}</span>
-                <button type="button" onClick={onLogout}>
+                <span className="muted wide-only">{user.displayName}</span>
+                <button type="button" onClick={onLogout} title={`Signed in as ${user.displayName}`}>
                   Log out
                 </button>
               </>
