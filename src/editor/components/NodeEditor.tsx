@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import type { Choice, NodeKind, OutcomeTone, TreeNode } from '../../core';
-import { incomingNodes, newChoice, renameNode, uid } from '../../core';
+import type { Choice, ChoiceTextField, NodeKind, NodeTextField, OutcomeTone, TranslationLocale, TreeNode } from '../../core';
+import { incomingNodes, newChoice, renameNode, setTranslation, uid } from '../../core';
 import { useTree } from '../TreeContext';
 import { ConditionEditor } from './ConditionEditor';
 import { EffectsEditor } from './EffectsEditor';
 import { IconButton, ListControls, move } from './fields';
+import { LocalizedField } from './LocalizedField';
 import { TransitionsEditor } from './TransitionsEditor';
 
 const ID_PATTERN = /^[\w-]+$/;
@@ -130,18 +131,30 @@ export function NodeEditor({ node, onPlayFrom }: { node: TreeNode; onPlayFrom?: 
         )}
       </div>
 
-      <label className="field">
-        <span>{node.kind === 'router' ? 'Title (editor only)' : 'Title'}</span>
-        <input value={node.title} onChange={(e) => patch((n) => ({ ...n, title: e.target.value }), 'title')} />
-      </label>
-
-      {node.kind !== 'router' && (
+      {node.kind === 'router' ? (
         <label className="field">
-          <span>
-            Text <span className="muted small">– supports **bold**, *italic* and {'{{variable}}'} placeholders</span>
-          </span>
-          <textarea rows={4} value={node.body} onChange={(e) => patch((n) => ({ ...n, body: e.target.value }), 'body')} />
+          <span>Title (editor only)</span>
+          <input value={node.title} onChange={(e) => patch((n) => ({ ...n, title: e.target.value }), 'title')} />
         </label>
+      ) : (
+        <>
+          <LocalizedField
+            label="Title"
+            value={node.title}
+            onChange={(title) => patch((n) => ({ ...n, title }), 'title')}
+            translations={node.translations?.title}
+            onTranslationChange={(locale, v) => patch((n) => withNodeTranslation(n, 'title', locale, v), `title-${locale}`)}
+          />
+          <LocalizedField
+            label="Text"
+            hint={<>supports **bold**, *italic* and {'{{variable}}'} placeholders</>}
+            multiline
+            value={node.body}
+            onChange={(body) => patch((n) => ({ ...n, body }), 'body')}
+            translations={node.translations?.body}
+            onTranslationChange={(locale, v) => patch((n) => withNodeTranslation(n, 'body', locale, v), `body-${locale}`)}
+          />
+        </>
       )}
 
       {node.kind === 'outcome' && node.outcome && (
@@ -154,21 +167,21 @@ export function NodeEditor({ node, onPlayFrom }: { node: TreeNode; onPlayFrom?: 
               <option value="negative">Negative</option>
             </select>
           </label>
-          <label className="field grow">
-            <span>Call-to-action label</span>
-            <input
-              value={node.outcome.cta?.label ?? ''}
-              onChange={(e) =>
-                patch((n) => {
-                  const label = e.target.value;
-                  const url = n.outcome?.cta?.url ?? '';
-                  const outcome: NonNullable<TreeNode['outcome']> = { ...n.outcome!, cta: { label, url } };
-                  if (!label && !url) delete outcome.cta;
-                  return { ...n, outcome };
-                }, 'cta-label')
-              }
-            />
-          </label>
+          <LocalizedField
+            label="Call-to-action label"
+            className="grow"
+            value={node.outcome.cta?.label ?? ''}
+            onChange={(label) =>
+              patch((n) => {
+                const url = n.outcome?.cta?.url ?? '';
+                const outcome: NonNullable<TreeNode['outcome']> = { ...n.outcome!, cta: { label, url } };
+                if (!label && !url) delete outcome.cta;
+                return { ...n, outcome };
+              }, 'cta-label')
+            }
+            translations={node.translations?.ctaLabel}
+            onTranslationChange={(locale, v) => patch((n) => withNodeTranslation(n, 'ctaLabel', locale, v), `cta-${locale}`)}
+          />
           <label className="field grow">
             <span>Call-to-action URL</span>
             <input
@@ -271,11 +284,22 @@ function ChoiceCard({
           {open ? '▾' : '▸'}
         </IconButton>
         <span className="choice-index">{index + 1}</span>
-        <input className="grow choice-label" value={choice.label} placeholder="Choice label" onChange={(e) => onChange({ ...choice, label: e.target.value }, 'label')} />
-        <span className="muted small mono" title="Choice id">
-          {choice.id}
-        </span>
-        <ListControls index={index} length={count} onMove={onMove} onRemove={onRemove} />
+        <LocalizedField
+          label="Choice"
+          className="grow choice-label-field"
+          inputClassName="choice-label"
+          placeholder="Choice label"
+          value={choice.label}
+          onChange={(label) => onChange({ ...choice, label }, 'label')}
+          translations={choice.translations?.label}
+          onTranslationChange={(locale, v) => onChange(withChoiceTranslation(choice, 'label', locale, v), `label-${locale}`)}
+        />
+        <div className="choice-head-side">
+          <span className="muted small mono" title="Choice id">
+            {choice.id}
+          </span>
+          <ListControls index={index} length={count} onMove={onMove} onRemove={onRemove} />
+        </div>
       </div>
       {!open ? (
         <div className="choice-summary muted small">
@@ -284,17 +308,17 @@ function ChoiceCard({
         </div>
       ) : (
         <div className="choice-body">
-          <label className="field">
-            <span>Description (optional)</span>
-            <input
-              value={choice.description ?? ''}
-              onChange={(e) => {
-                const next: Choice = { ...choice, description: e.target.value };
-                if (!next.description) delete next.description;
-                onChange(next, 'description');
-              }}
-            />
-          </label>
+          <LocalizedField
+            label="Description (optional)"
+            value={choice.description ?? ''}
+            onChange={(description) => {
+              const next: Choice = { ...choice, description };
+              if (!next.description) delete next.description;
+              onChange(next, 'description');
+            }}
+            translations={choice.translations?.description}
+            onTranslationChange={(locale, v) => onChange(withChoiceTranslation(choice, 'description', locale, v), `description-${locale}`)}
+          />
           <div className="sub">
             <h4>Show only if</h4>
             <ConditionEditor
@@ -324,4 +348,16 @@ function ChoiceCard({
       )}
     </div>
   );
+}
+
+function withNodeTranslation(n: TreeNode, field: NodeTextField, locale: TranslationLocale, value: string): TreeNode {
+  const next: TreeNode = { ...n, translations: setTranslation(n.translations, field, locale, value) };
+  if (!next.translations) delete next.translations;
+  return next;
+}
+
+function withChoiceTranslation(c: Choice, field: ChoiceTextField, locale: TranslationLocale, value: string): Choice {
+  const next: Choice = { ...c, translations: setTranslation(c.translations, field, locale, value) };
+  if (!next.translations) delete next.translations;
+  return next;
 }

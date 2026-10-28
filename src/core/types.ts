@@ -12,6 +12,32 @@
 
 export const SCHEMA_VERSION = 1;
 
+/** Languages a tree can be played in. English is the main language and lives in the plain fields. */
+export const LOCALES = ['en', 'hu', 'de'] as const;
+export type Locale = (typeof LOCALES)[number];
+export const DEFAULT_LOCALE: Locale = 'en';
+/** Languages stored in `translations` (everything except the main language). */
+export type TranslationLocale = Exclude<Locale, 'en'>;
+export const TRANSLATION_LOCALES: TranslationLocale[] = ['hu', 'de'];
+
+/** Alternate-language texts for one field, e.g. `{ "hu": "Mi hozott ma ide?", "de": "Was führt Sie zu uns?" }`. */
+export type LocalizedText = Partial<Record<TranslationLocale, string>>;
+
+/**
+ * Per-element translations, keyed by field name, then by language:
+ *
+ *   "title": "What brings you here today?",
+ *   "translations": { "title": { "hu": "Mi hozott ma ide?", "de": "Was führt Sie heute zu uns?" } }
+ *
+ * The plain field always holds the English (main) text, which is the fallback
+ * for any missing translation.
+ */
+export type Translations<F extends string> = Partial<Record<F, LocalizedText>>;
+
+export type ChoiceTextField = 'label' | 'description';
+export type NodeTextField = 'title' | 'body' | 'ctaLabel';
+export type TreeTextField = 'title' | 'description';
+
 export type NodeId = string;
 export type VarKey = string;
 
@@ -80,6 +106,7 @@ export interface Choice {
    * so choices that only differ in their effects can share the node's routing.
    */
   transitions: Transition[];
+  translations?: Translations<ChoiceTextField>;
 }
 
 /**
@@ -108,6 +135,8 @@ export interface TreeNode {
   };
   /** Free-form editor note, never shown to players. */
   notes?: string;
+  /** `ctaLabel` translates `outcome.cta.label`. */
+  translations?: Translations<NodeTextField>;
 }
 
 export interface Variable {
@@ -128,5 +157,6 @@ export interface DecisionTree {
   startNodeId: NodeId;
   variables: Variable[];
   nodes: TreeNode[];
+  translations?: Translations<TreeTextField>;
   updatedAt?: string;
 }

@@ -23,7 +23,7 @@ export function Preview({
     <div className="preview">
       <div className="preview-frame">
         <div className="preview-label muted small">Preview – this is what visitors of the viewer see</div>
-        <DecisionTreePlayer tree={tree} session={session} onSessionChange={onSessionChange} onEditNode={onEditNode} />
+        <DecisionTreePlayer tree={tree} session={session} onSessionChange={onSessionChange} onEditNode={onEditNode} showHeader />
       </div>
       <DebugPanel tree={tree} session={session} prevVars={prevVars} onEditNode={onEditNode} />
     </div>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { availableChoices, playPath, startSession, choose, validateTree, reachableNodes } from '../core';
+import { availableChoices, playPath, startSession, choose, validateTree, reachableNodes, translatableTexts, translationCoverage } from '../core';
 import { createItServicesTree } from './itServices';
 
 const tree = createItServicesTree();
@@ -88,5 +88,19 @@ describe('IT services example', () => {
     }
     const outcomes = tree.nodes.filter((n) => n.kind === 'outcome').map((n) => n.id);
     for (const o of outcomes) expect(reached, o).toContain(o);
+  });
+});
+
+describe('IT services example translations', () => {
+  it('is fully translated into Hungarian and German', () => {
+    for (const c of translationCoverage(tree)) expect(c, c.locale).toMatchObject({ translated: c.total, incompleteNodes: [] });
+  });
+  it('keeps the same {{placeholders}} in every language', () => {
+    const vars = (s: string) => [...s.matchAll(/\{\{\s*(\w+)\s*\}\}/g)].map((m) => m[1]).sort();
+    for (const t of translatableTexts(tree)) {
+      for (const [locale, text] of Object.entries(t.translations ?? {})) {
+        expect(vars(text as string), `${t.nodeId}.${t.field} (${locale})`).toEqual(vars(t.base));
+      }
+    }
   });
 });

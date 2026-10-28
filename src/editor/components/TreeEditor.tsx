@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react';
-import type { Issue, NodeKind } from '../../core';
-import { reachableNodes } from '../../core';
+import type { DecisionTree, Issue, NodeKind, TranslationLocale, TreeTextField } from '../../core';
+import { LOCALE_NAMES, reachableNodes, setTranslation, translationCoverage } from '../../core';
 import { useTree } from '../TreeContext';
 import { NodeSelect } from './fields';
+import { LocalizedField } from './LocalizedField';
 import { NodeEditor } from './NodeEditor';
 import { VariablesPanel } from './VariablesPanel';
 
@@ -103,23 +104,86 @@ export function TreeEditor({
   );
 }
 
+function withTreeTranslation(t: DecisionTree, field: TreeTextField, locale: TranslationLocale, value: string): DecisionTree {
+  const next: DecisionTree = { ...t, translations: setTranslation(t.translations, field, locale, value) };
+  if (!next.translations) delete next.translations;
+  return next;
+}
+
+function TranslationCoverage() {
+  const { tree, selectNode } = useTree();
+  const coverage = useMemo(() => translationCoverage(tree), [tree]);
+  return (
+    <>
+      <h3>Translations</h3>
+      <p className="muted small">
+        English is the main language. Every text the player shows has Hungarian and German tabs; missing translations fall back to English. The player
+        offers a language once at least one text is translated into it.
+      </p>
+      <table className="coverage">
+        <tbody>
+          {coverage.map((c) => {
+            const pct = c.total ? Math.round((c.translated / c.total) * 100) : 100;
+            return (
+              <tr key={c.locale}>
+                <th>{LOCALE_NAMES[c.locale].english}</th>
+                <td className="coverage-bar">
+                  <span className="track">
+                    <span style={{ width: `${pct}%` }} />
+                  </span>
+                </td>
+                <td className="small">
+                  {c.translated}/{c.total} texts ({pct}%)
+                </td>
+                <td className="small">
+                  {c.incompleteNodes.slice(0, 12).map((id) =>
+                    id ? (
+                      <button key={id} type="button" className="chip" onClick={() => selectNode(id)} title={`Open ${id}`}>
+                        {id}
+                      </button>
+                    ) : (
+                      <span key="tree" className="chip muted">
+                        tree title/description
+                      </span>
+                    ),
+                  )}
+                  {c.incompleteNodes.length > 12 && <span className="muted"> +{c.incompleteNodes.length - 12} more</span>}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </>
+  );
+}
+
 function TreeSettings() {
   const { tree, update } = useTree();
   return (
     <div className="tree-settings">
       <h2>Tree settings</h2>
-      <label className="field">
-        <span>Title</span>
-        <input value={tree.title} onChange={(e) => update((t) => ({ ...t, title: e.target.value }), 'title')} />
-      </label>
-      <label className="field">
-        <span>Description</span>
-        <textarea rows={3} value={tree.description} onChange={(e) => update((t) => ({ ...t, description: e.target.value }), 'description')} />
-      </label>
+      <LocalizedField
+        label="Title"
+        value={tree.title}
+        onChange={(title) => update((t) => ({ ...t, title }), 'title')}
+        translations={tree.translations?.title}
+        onTranslationChange={(locale, v) => update((t) => withTreeTranslation(t, 'title', locale, v), `title-${locale}`)}
+      />
+      <LocalizedField
+        label="Description"
+        multiline
+        rows={3}
+        value={tree.description}
+        onChange={(description) => update((t) => ({ ...t, description }), 'description')}
+        translations={tree.translations?.description}
+        onTranslationChange={(locale, v) => update((t) => withTreeTranslation(t, 'description', locale, v), `description-${locale}`)}
+      />
       <label className="field">
         <span>Start node</span>
         <NodeSelect value={tree.startNodeId} onChange={(startNodeId) => update((t) => ({ ...t, startNodeId }))} />
       </label>
+      <TranslationCoverage />
       <h3>How it works</h3>
       <ul className="help">
         <li>

@@ -61,3 +61,44 @@
 .progress {
   margin-bottom: 6px;
 }
+.player-header h1 {
+  margin: 0 0 6px;
+  font-size: 26px;
+}
+.player-header p {
+  margin: 0 0 24px;
+  line-height: 1.5;
+}
+.player-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+.player-top .progress {
+  margin-bottom: 0;
+}
+.language-switch {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.language-switch button {
+  border: none;
+  border-radius: 0;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  background: var(--panel);
+  color: var(--muted);
+}
+.language-switch button + button {
+  border-left: 1px solid var(--border);
+}
+.language-switch button.active {
+  background: var(--accent);
+  color: var(--on-accent);
+}

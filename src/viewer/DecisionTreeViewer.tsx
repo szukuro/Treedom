@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
+import { browserLanguages, resolveInitialLocale, treeText, type Locale } from '../core';
 import { DecisionTreePlayer } from '../player/DecisionTreePlayer';
+import { PLAYER_STRINGS } from '../player/strings';
 import { ThemeToggle } from '../shared/ThemeToggle';
 import { viewerApi } from '../api/viewerApi';
 import type { PublishedTree, PublishedTreeSource } from '../api/types';
@@ -16,6 +18,11 @@ export interface DecisionTreeViewerProps {
   showHeader?: boolean;
   /** Override the data source (defaults to `viewerApi.published`). */
   source?: PublishedTreeSource;
+  /**
+   * Language to start in ("hu", "de", …). Precedence: this parameter, then the
+   * browser's preferred languages (if the tree is translated into one), then English.
+   */
+  language?: string;
 }
 
 type State = { status: 'loading' } | { status: 'ready'; data: PublishedTree } | { status: 'failed'; message: string };
@@ -25,9 +32,18 @@ type State = { status: 'loading' } | { status: 'ready'; data: PublishedTree } | 
  * plays it. Has no editor code, login or localStorage – deploy it as static files
  * together with the `decision.json` exported from the editor.
  */
-export function DecisionTreeViewer({ src, showHeader = true, source = viewerApi.published }: DecisionTreeViewerProps) {
+export function DecisionTreeViewer({ src, showHeader = true, source = viewerApi.published, language }: DecisionTreeViewerProps) {
   const url = src ?? resolveDecisionUrl(window.location.href);
   const [state, setState] = useState<State>({ status: 'loading' });
+  // Before the tree is loaded we don't know its languages; use the same precedence over all supported ones.
+  const [locale, setLocale] = useState<Locale>(() => resolveInitialLocale(language, browserLanguages()));
+  const t = PLAYER_STRINGS[locale];
+
+  // Keep <html lang> and the page title in the active language.
+  useEffect(() => {
+    document.documentElement.lang = locale;
+    if (state.status === 'ready') document.title = treeText(state.data.tree, 'title', locale);
+  }, [locale, state]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -36,7 +52,6 @@ export function DecisionTreeViewer({ src, showHeader = true, source = viewerApi.
       .load(url, controller.signal)
       .then((data) => {
         setState({ status: 'ready', data });
-        document.title = data.tree.title;
       })
       .catch((e: Error) => {
         if (!controller.signal.aborted) setState({ status: 'failed', message: e.message });
@@ -47,20 +62,18 @@ export function DecisionTreeViewer({ src, showHeader = true, source = viewerApi.
   if (state.status === 'loading') {
     return (
       <div className="viewer">
-        <p className="viewer-status muted">Loading…</p>
+        <p className="viewer-status muted">{t.loading}</p>
       </div>
     );
   }
   if (state.status === 'failed') {
     return (
       <div className="viewer">
-        <ThemeToggle className="theme-toggle-corner" />
+        <ThemeToggle className="theme-toggle-corner" labels={t.theme} />
         <div className="card error-card">
-          <h2>This questionnaire is not available</h2>
+          <h2>{t.notAvailable}</h2>
           <p>{state.message}</p>
-          <p className="muted small">
-            The viewer expects a <code>decision.json</code> exported from the Treedom editor in the same folder as this page.
-          </p>
+          <p className="muted small">{t.expectsFile}</p>
         </div>
       </div>
     );
@@ -69,19 +82,13 @@ export function DecisionTreeViewer({ src, showHeader = true, source = viewerApi.
   const { tree, errors } = state.data;
   return (
     <div className="viewer">
-      <ThemeToggle className="theme-toggle-corner" />
-      {showHeader && (
-        <header className="viewer-header">
-          <h1>{tree.title}</h1>
-          {tree.description && <p className="muted">{tree.description}</p>}
-        </header>
-      )}
+      <ThemeToggle className="theme-toggle-corner" labels={t.theme} />
       {errors.length > 0 && (
         <p className="viewer-warning small" title={errors.map((e) => e.message).join('\n')}>
-          This questionnaire has {errors.length} configuration problem(s); some answers may not lead anywhere.
+          {t.configProblems(errors.length)}
         </p>
       )}
-      <DecisionTreePlayer tree={tree} />
+      <DecisionTreePlayer tree={tree} language={language} showHeader={showHeader} onLanguageChange={setLocale} />
     </div>
   );
 }

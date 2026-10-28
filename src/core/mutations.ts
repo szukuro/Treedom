@@ -2,7 +2,8 @@
  * Pure helpers for editing a tree: id generation, factories and renames that keep
  * every reference in sync.
  */
-import type { Choice, Condition, DecisionTree, Effect, Operand, Transition, TreeNode, NodeKind } from './types';
+import type { Choice, Condition, DecisionTree, Effect, LocalizedText, Operand, Transition, Translations, TreeNode, NodeKind } from './types';
+import { translatableTexts } from './i18n';
 import { SCHEMA_VERSION } from './types';
 
 export function uid(prefix = ''): string {
@@ -140,11 +141,40 @@ export function renameVariable(tree: DecisionTree, from: string, to: string): De
     condition: (c) => (c.type === 'compare' ? { ...c, left: mapOperand(c.left, from, to), right: mapOperand(c.right, from, to) } : c),
     effect: (e) => ({ ...e, var: e.var === from ? to : e.var, value: mapOperand(e.value, from, to) }),
   });
-  return {
+  const renamed = {
     ...mapped,
     variables: mapped.variables.map((v) => (v.key === from ? { ...v, key: to } : v)),
-    nodes: mapped.nodes.map((n) => ({ ...n, body: n.body.replace(pattern, `{{${to}}}`) })),
   };
+  return mapTreeTexts(renamed, (text) => text.replace(pattern, `{{${to}}}`));
+}
+
+function mapLocalized<F extends string>(t: Translations<F> | undefined, fn: (s: string) => string): Translations<F> | undefined {
+  if (!t) return t;
+  const out = {} as Translations<F>;
+  for (const [field, texts] of Object.entries(t) as [F, LocalizedText][]) {
+    out[field] = Object.fromEntries(Object.entries(texts).map(([l, v]) => [l, fn(v as string)])) as LocalizedText;
+  }
+  return out;
+}
+
+/** Applies `fn` to every player-visible text, in every language. */
+export function mapTreeTexts(tree: DecisionTree, fn: (text: string) => string): DecisionTree {
+  const withTr = <T extends { translations?: Translations<string> }>(el: T): T =>
+    el.translations ? { ...el, translations: mapLocalized(el.translations, fn) } : el;
+  return withTr({
+    ...tree,
+    title: fn(tree.title),
+    description: fn(tree.description),
+    nodes: tree.nodes.map((n) =>
+      withTr({
+        ...n,
+        title: fn(n.title),
+        body: fn(n.body),
+        ...(n.outcome?.cta ? { outcome: { ...n.outcome, cta: { ...n.outcome.cta, label: fn(n.outcome.cta.label) } } } : {}),
+        choices: n.choices.map((c) => withTr({ ...c, label: fn(c.label), ...(c.description !== undefined ? { description: fn(c.description) } : {}) })),
+      }),
+    ),
+  });
 }
 
 export function renameNode(tree: DecisionTree, from: string, to: string): DecisionTree {
@@ -177,7 +207,9 @@ export function variableUsage(tree: DecisionTree, key: string): number {
       return e;
     },
   });
-  for (const n of tree.nodes) count += (n.body.match(text) ?? []).length;
+  for (const t of translatableTexts(tree)) {
+    for (const value of [t.base, ...Object.values(t.translations ?? {})]) count += (value?.match(text) ?? []).length;
+  }
   return count;
 }
 

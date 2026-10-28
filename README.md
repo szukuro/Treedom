@@ -51,6 +51,44 @@ The credentials are hardcoded in `src/api/local/credentials.ts`: `editor` / `tre
 | Routers (violet) | byzantium `#7b2d7e` | orchid `#d290ef` |
 | Warnings and play-through (amber) | saffron `#b0700a` | marigold `#f2b544` |
 
+## Localization
+
+Trees can be played in **English** (the main language), **Hungarian** and **German**. These three are hardcoded, and no other languages can be added at runtime. The editor itself is always in English.
+
+**Author-written texts** carry their translations in the JSON. English stays in the plain field. Each element with player-visible text gets a `translations` node, keyed by field, then by language:
+
+```json
+{
+  "id": "start",
+  "title": "What brings you here today?",
+  "body": "Answer a few quick questions…",
+  "translations": {
+    "title": { "hu": "Mi hozott ma ide?", "de": "Was führt Sie heute zu uns?" },
+    "body":  { "hu": "Válaszoljon néhány gyors kérdésre…", "de": "Beantworten Sie ein paar kurze Fragen…" }
+  }
+}
+```
+
+| Element | Translatable fields |
+| --- | --- |
+| tree | `title`, `description` |
+| question / outcome node | `title`, `body`, `ctaLabel` (the call-to-action button's label) |
+| choice | `label`, `description` |
+
+Router titles, transition notes and variable labels are editor-only and are not translated. A missing or blank translation falls back to English. `{{variable}}` placeholders work in every language, and renaming a variable updates them everywhere. Files without `translations` are still valid.
+
+**Fixed player texts** ("Step 2", "← Back", "Start over", "Recommendation", loading and error messages, the theme switch) are hardcoded per language in `src/player/strings.ts`.
+
+**In the editor**, each player-visible input is a set of tabs. The first tab is the field itself ("Title", "Text", "Choice", …) and the next two are **Hungarian** and **German**. A dot on a tab shows whether that translation is done (filled) or missing (hollow). The translation tabs show the English text underneath for reference. **Tree settings → Translations** shows coverage per language and links to every node with gaps.
+
+**In the player**, an EN / HU / DE switch appears above the questions. Switching keeps the current progress. The starting language is chosen in this order:
+
+1. The `language` parameter of the player component (`<DecisionTreePlayer language="hu" />`, `<DecisionTreeViewer language="de" />`). The standalone viewer page maps `?lang=hu` to this parameter.
+2. The browser's preferred languages (`navigator.languages`), if the tree is translated into one of them.
+3. English.
+
+A language counts as "available" once at least one text in the tree is translated into it. The bundled example is fully translated into both languages.
+
 ## Project structure
 
 ```
@@ -119,6 +157,7 @@ import { EditorApp, DecisionTreeViewer, DecisionTreePlayer, parseTree, playPath 
 
 <EditorApp />                                   // login + authoring environment
 <DecisionTreeViewer />                          // fetches ./decision.json
+<DecisionTreeViewer language="hu" />            // ...starting in Hungarian
 <DecisionTreeViewer src="/api/trees/42" />      // ...or any URL returning the JSON
 <DecisionTreePlayer tree={parseTree(json)} />   // just the player, for a tree you already have
 

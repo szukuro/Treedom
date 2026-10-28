@@ -20,7 +20,8 @@
  * - Some outcomes still offer choices that change state and re-enter the tree.
  *
  * The tree is written with small helper functions for readability; the result is
- * plain JSON (see `examples/it-services.json`).
+ * plain JSON (see `examples/it-services.json`). Hungarian and German texts live
+ * in `itServices.translations.ts`.
  */
 import type {
   Choice,
@@ -34,6 +35,7 @@ import type {
   Variable,
 } from '../core/types';
 import { SCHEMA_VERSION } from '../core/types';
+import { applyTranslations } from './itServices.translations';
 
 // --- tiny DSL -------------------------------------------------------------
 
@@ -447,7 +449,7 @@ export function createItServicesTree(): DecisionTree {
     ),
   ];
 
-  return {
+  return applyTranslations({
     schemaVersion: SCHEMA_VERSION,
     id: 'example-it-services',
     title: 'Kestrel Digital – are we the right partner?',
@@ -456,5 +458,5 @@ export function createItServicesTree(): DecisionTree {
     startNodeId: 'start',
     variables,
     nodes,
-  };
+  });
 }
