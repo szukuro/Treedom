@@ -37,6 +37,20 @@ The viewer resolves `decision.json` relative to its own page. `…/decision/inde
 
 The credentials are hardcoded in `src/api/local/credentials.ts`: `editor` / `treedom` by default. You can override them at build time with `VITE_EDITOR_USERNAME` and `VITE_EDITOR_PASSWORD`. **This is a UX gate, not security.** The values ship inside the JavaScript bundle, so don't deploy the editor anywhere it must be protected. The login lasts for the browser tab (sessionStorage).
 
+### Look & feel
+
+- **Font:** [Poppins](https://fonts.google.com/specimen/Poppins), loaded from Google Fonts in both `index.html` files.
+- **Themes:** light and dark. Both apps have a toggle that cycles **Auto** (follow the OS setting) → **Light** → **Dark**. The choice is stored per browser and applied before first paint, so there's no flash of the wrong theme. See `src/shared/theme.ts`.
+- **Palette:** each mode has its own shade of each colour. All colours are CSS variables in `src/shared/base.css`.
+
+| Role | Light | Dark |
+| --- | --- | --- |
+| Accent and outcomes (green) | jade `#0b7a62` | sea glass `#4fd6ad` |
+| Questions (blue) | lapis `#2a4b9b` | periwinkle `#8fa7ff` |
+| Danger and negative (red) | cardinal `#b3213f` | watermelon `#ff6f87` |
+| Routers (violet) | byzantium `#7b2d7e` | orchid `#d290ef` |
+| Warnings and play-through (amber) | saffron `#b0700a` | marigold `#f2b544` |
+
 ## Project structure
 
 ```

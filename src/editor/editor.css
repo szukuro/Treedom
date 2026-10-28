@@ -162,7 +162,7 @@
   justify-content: center;
   font-size: 12px;
   font-weight: 700;
-  color: white;
+  color: var(--on-accent);
   flex: none;
 }
 .kind-question .kind-icon {

@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { AuthError, type AuthApi, type AuthSession } from '../api/types';
+import { ThemeToggle } from '../shared/ThemeToggle';
 
 export function LoginScreen({ auth, onLogin }: { auth: AuthApi; onLogin: (s: AuthSession) => void }) {
   const [username, setUsername] = useState('');
@@ -21,6 +22,7 @@ export function LoginScreen({ auth, onLogin }: { auth: AuthApi; onLogin: (s: Aut
 
   return (
     <div className="login-screen">
+      <ThemeToggle className="theme-toggle-corner" />
       <form className="card login-card" onSubmit={submit}>
         <h1>
           <span className="logo">🌳</span> Treedom Editor

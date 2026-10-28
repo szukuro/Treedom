@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { DecisionTreePlayer } from '../player/DecisionTreePlayer';
+import { ThemeToggle } from '../shared/ThemeToggle';
 import { viewerApi } from '../api/viewerApi';
 import type { PublishedTree, PublishedTreeSource } from '../api/types';
 import { resolveDecisionUrl } from './resolveDecisionUrl';
@@ -53,6 +54,7 @@ export function DecisionTreeViewer({ src, showHeader = true, source = viewerApi.
   if (state.status === 'failed') {
     return (
       <div className="viewer">
+        <ThemeToggle className="theme-toggle-corner" />
         <div className="card error-card">
           <h2>This questionnaire is not available</h2>
           <p>{state.message}</p>
@@ -67,6 +69,7 @@ export function DecisionTreeViewer({ src, showHeader = true, source = viewerApi.
   const { tree, errors } = state.data;
   return (
     <div className="viewer">
+      <ThemeToggle className="theme-toggle-corner" />
       {showHeader && (
         <header className="viewer-header">
           <h1>{tree.title}</h1>

@@ -11,6 +11,7 @@ import { getLastOpenTreeId, setLastOpenTreeId } from './preferences';
 import { Preview } from './Preview';
 import { TreeContext, type TreeContextValue } from './TreeContext';
 import { useUndoable } from './useUndoable';
+import { ThemeToggle } from '../shared/ThemeToggle';
 
 type Tab = 'edit' | 'graph' | 'preview' | 'json';
 type SaveState = 'saved' | 'saving' | 'error';
@@ -262,14 +263,17 @@ function Workspace({
               {saveState === 'saving' ? 'Saving…' : saveState === 'error' ? 'Save failed – will retry on next change' : 'All changes saved'}
             </span>
           </div>
-          {user && (
-            <div className="user-box small">
-              <span className="muted">{user.displayName}</span>
-              <button type="button" onClick={onLogout}>
-                Log out
-              </button>
-            </div>
-          )}
+          <div className="user-box small">
+            <ThemeToggle />
+            {user && (
+              <>
+                <span className="muted">{user.displayName}</span>
+                <button type="button" onClick={onLogout}>
+                  Log out
+                </button>
+              </>
+            )}
+          </div>
           <input
             ref={fileInput}
             type="file"

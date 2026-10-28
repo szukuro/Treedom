@@ -1,43 +1,79 @@
+/*
+ * Palette – a separate shade set per mode:
+ *
+ *            light            dark
+ *   green    jade #0b7a62     sea glass #4fd6ad   (accent, outcomes)
+ *   blue     lapis #2a4b9b    periwinkle #8fa7ff  (questions)
+ *   red      cardinal #b3213f watermelon #ff6f87  (danger, negative)
+ *   violet   byzantium #7b2d7e orchid #d290ef    (routers)
+ *   amber    saffron #b0700a  marigold #f2b544    (warnings, play-through)
+ *
+ * Theme selection: no `data-theme` on <html> follows the OS setting;
+ * `data-theme="light"` / `"dark"` forces one (see src/shared/theme.ts).
+ */
 :root {
-  --bg: #f6f7f9;
+  --bg: #f7f4ef;
   --panel: #ffffff;
-  --panel-2: #f0f2f5;
-  --border: #dde1e7;
-  --text: #1d2330;
-  --muted: #6b7385;
-  --accent: #2f6f4f;
-  --accent-soft: #e3f1e9;
-  --danger: #b4372d;
-  --warning: #b07a12;
-  --question: #3b6fd8;
-  --router: #8a55c9;
-  --outcome: #2f8f5f;
+  --panel-2: #f1ece4;
+  --border: #e2dbd0;
+  --text: #1f1a28;
+  --muted: #6f687b;
+  --accent: #0b7a62;
+  --accent-soft: #dcf1e9;
+  --on-accent: #ffffff;
+  --danger: #b3213f;
+  --warning: #b0700a;
+  --question: #2a4b9b;
+  --router: #7b2d7e;
+  --outcome: #0b7a62;
   --radius: 8px;
-  --shadow: 0 1px 2px rgb(0 0 0 / 6%), 0 2px 8px rgb(0 0 0 / 4%);
+  --shadow: 0 1px 2px rgb(40 20 30 / 6%), 0 2px 10px rgb(40 20 30 / 5%);
   color-scheme: light;
-  font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-family: Poppins, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   font-size: 14px;
   color: var(--text);
   background: var(--bg);
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #14171c;
-    --panel: #1c2027;
-    --panel-2: #242933;
-    --border: #333a46;
-    --text: #e4e7ec;
-    --muted: #9099aa;
-    --accent: #5cc08a;
-    --accent-soft: #1f3a2b;
-    --danger: #ef6b5f;
-    --warning: #e3b24a;
-    --question: #6f9cff;
-    --router: #b48ae8;
-    --outcome: #5cc08a;
+  :root:not([data-theme='light']) {
+    --bg: #12111a;
+    --panel: #1b1a26;
+    --panel-2: #252334;
+    --border: #363349;
+    --text: #ece9f3;
+    --muted: #9d98ae;
+    --accent: #4fd6ad;
+    --accent-soft: #173b32;
+    --on-accent: #0c1a16;
+    --danger: #ff6f87;
+    --warning: #f2b544;
+    --question: #8fa7ff;
+    --router: #d290ef;
+    --outcome: #4fd6ad;
+    --shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 2px 10px rgb(0 0 0 / 25%);
     color-scheme: dark;
   }
+}
+
+/* Same values as above, for an explicit dark choice regardless of the OS setting. */
+:root[data-theme='dark'] {
+  --bg: #12111a;
+  --panel: #1b1a26;
+  --panel-2: #252334;
+  --border: #363349;
+  --text: #ece9f3;
+  --muted: #9d98ae;
+  --accent: #4fd6ad;
+  --accent-soft: #173b32;
+  --on-accent: #0c1a16;
+  --danger: #ff6f87;
+  --warning: #f2b544;
+  --question: #8fa7ff;
+  --router: #d290ef;
+  --outcome: #4fd6ad;
+  --shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 2px 10px rgb(0 0 0 / 25%);
+  color-scheme: dark;
 }
 
 * {
@@ -90,7 +126,7 @@ button:disabled {
 button.primary {
   background: var(--accent);
   border-color: var(--accent);
-  color: white;
+  color: var(--on-accent);
   font-weight: 600;
 }
 button.primary:hover:not(:disabled) {
@@ -173,4 +209,19 @@ code {
 
 .error-card {
   border-color: var(--danger);
+}
+
+/* --- theme toggle --------------------------------------------------------- */
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.theme-toggle-corner {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 10;
 }
